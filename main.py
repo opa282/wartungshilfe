@@ -72,6 +72,10 @@ class SchematicRequest(BaseModel):
     part: str
 
 # API Endpunkte
+@app.get("/health")
+async def health_check():
+    return {"status": "ok"}
+
 @app.get("/api/search_errors")
 async def search_errors(query: str = ""):
     if not query:
