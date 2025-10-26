@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digitale Wartungshilfe</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Digitale Wartungshilfe</h1>
+        
+        <div class="selection-box">
+            <label for="error-search">1. Suchen Sie die Fehlermeldung:</label>
+            <input type="text" id="error-search" placeholder="Fehlercode oder Beschreibung eingeben..." autocomplete="off">
+            <div id="suggestions-box" class="suggestions"></div>
+        </div>
+
+        <div class="selection-box">
+            <label for="error-dropdown">Oder wählen Sie einen Fehler aus der Liste:</label>
+            <select id="error-dropdown" disabled>
+                <option>Lade Fehlerliste...</option>
+            </select>
+        </div>
+
+        <div class="selection-box" id="parts-section" style="display: none;">
+            <label for="part-select">2. Wählen Sie das mögliche defekte Teil:</label>
+            <select id="part-select"></select>
+        </div>
+
+        <div id="result-section" style="display: none;">
+            <h2>Benötigter Schaltplan:</h2>
+            <p id="schematic-result"></p>
+        </div>
+    </div>
+
+    <script src="/static/script.js"></script>
+</body>
+</html>
