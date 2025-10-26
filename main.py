@@ -1,4 +1,3 @@
-
 import fastapi
 import uvicorn
 import os
@@ -11,91 +10,55 @@ from pydantic import BaseModel
 # Daten-Integration
 # ==============================================================================
 def load_data():
-    """Lädt die echten Fehlerdaten und generiert zugehörige Teile."""
+    """Lädt die Fehlerdaten, ordnet Lösungen zu und generiert Teile."""
     
-    # Manuell aus dem User-Input extrahierte Fehler
-    error_messages = [
-        # Alte Fehler
-        "Not enough memory to generate the external reference list",
-        "Cycle time is greater than the set watchdog time",
-        "Access violation by an IEC task (for example zero pointer)",
-        "Exception cannot be assigned to an IEC task",
-        "Cycle time of IEC task is greater than watchdog time",
-        "There is not enough memory available for configuration of PROFINET Controller",
-        "Internal error occured during configuration of PROFINET Controller",
-        "Internal error, no access to IO data",
-        "Watchdog task could not be installed",
-        "Installation of the Communication Module bus driver failed",
-        "Initialization error, not enough memory",
-        "Accessing test to the Communication Module failed",
-        "Watchdog test for the Communication Module failed",
-        "Error in configuration data, PLC cannot read",
-        "Timeout when setting the warm start parameters of the Communication Module",
-        "Installation of the Communication Module driver failed",
-        "Error occurred when creating the I/O description list of the Communication Module",
-        "Error configuration",
-        "Error in firmware version of Communication Module (version not supported/too old)",
-        "Maximum errors in series detected 50 telegrams in sequence are invalid or corrupted.",
-        "Installation of a protocol driver for the serial interface failed, not enough memory",
-        "Incorrect data format of the hardware driver of the I/O-Bus",
-        "FPU division by zero",
-        "FPU overflow",
-        "FPU underflow",
-        "Forbidden FPU operation (e.g. 0/0)",
-        "Error internal Ethernet",
-        "Program not started because of an existing error",
-        "User program contains an endless loop, a stop by hand is necessary",
-        "No configuration available",
-        "Writing of the boot project failed",
-        "Failed to delete boot project",
-        "Error firmware update of SD card, file could not be opened",
-        "Error while reading/writing the configuration data from/to the SD card",
+    # Manuell erstellte Zuordnung von Fehlern zu Lösungen
+    error_remedy_map = {
+        "Not enough memory to generate the external reference list": "Increase PLC memory or simplify program.",
+        "Cycle time is greater than the set watchdog time": "Change task configuration or optimize code.",
+        "Access violation by an IEC task (for example zero pointer)": "Correct program logic (e.g., check for null pointers).",
+        "Internal error, no access to IO data": "Restart CPU or call support.",
+        "Watchdog task could not be installed": "Check Communication Module and CPU firmware version.",
+        "Error in configuration data, PLC cannot read": "Create new configuration.",
+        "Timeout when setting the warm start parameters of the Communication Module": "Check Communication Module.",
+        "Error in firmware version of Communication Module (version not supported/too old)": "Update firmware of the Communication Module.",
+        "Maximum errors in series detected 50 telegrams in sequence are invalid or corrupted.": "Restart PLC. If error still exists, replace PLC.",
+        "FPU division by zero": "Correct program to avoid division by zero.",
+        "Timeout in the I/O Module": "Replace I/O module.",
+        "Overflow diagnosis buffer": "Restart PLC.",
+        "Process voltage too high": "Check process voltage source and wiring.",
+        "Process voltage too low": "Check process voltage source and wiring.",
+        "Plausibility check failed (iParameter)": "Check configuration parameters.",
+        "Checksum error in the I/O Module": "Replace I/O Module or check safety configuration.",
+        "PROFIsafe communication error": "Restart I/O Module. If error persists, contact support.",
+        "PROFIsafe watchdog timed out": "Restart I/O Module or increase watchdog time.",
+        "Internal data interchange disturbed": "Check PLC program and module connections.",
+        "Different hardware and firmware versions in the module": "Replace I/O Module to match versions.",
+        "Internal error in the device": "Replace I/O Module.",
+        "Sensor voltage too low": "Check sensor voltage and wiring.",
+        "Process voltage switched off (ON->OFF)": "Turn process voltage ON.",
+        "Short-circuit at the digital output": "Check terminal and wiring for short-circuits."
+    }
 
-        # Neue Fehler
-        "Timeout in the I/O Module",
-        "Overflow diagnosis buffer",
-        "Process voltage too high",
-        "Process voltage too low",
-        "Plausibility check failed (iParameter)",
-        "Checksum error in the I/O Module",
-        "PROFIsafe communication error",
-        "PROFIsafe watchdog timed out",
-        "Parameter value or configuration error",
-        "Internal data interchange disturbed",
-        "Different hardware and firmware versions in the module",
-        "Internal error in the device",
-        "Sensor voltage too low",
-        "Process voltage switched off (ON->OFF)",
-        "Wrong measurement; wrong temperature at the compensations channel",
-        "AI531: Wrong measurement; potential difference is to high",
-        "Output overflow at analog output",
-        "Measurement underflow at the analog input",
-        "Input/output value to high",
-        "Short-circuit at the analog input",
-        "Measurement overflow or cut wire at the analog input",
-        "Short-circuit at the digital output",
-        "PLC conflict",
-        "Outputs are different (synchronization error)"
-    ]
-
-    fehler_db = {}
+    # Erstelle die finale Datenstruktur
+    error_data = {}
     teile_db = {}
-    
     komponenten = ["Sensor", "Motor", "Pumpe", "Ventil", "Steuerung", "Relais", "Kabelbaum", "Netzteil"]
-    
-    for i, error in enumerate(error_messages):
+
+    for i, (error, remedy) in enumerate(error_remedy_map.items()):
         anzahl_teile = random.randint(1, 3)
         moegliche_teile = []
         for j in range(anzahl_teile):
             teil_name = f"{random.choice(komponenten)}-{i+1}.{j+1}"
             moegliche_teile.append(teil_name)
             teile_db[teil_name] = f"plan_{teil_name.lower().replace(' ', '_')}.pdf"
-            
-        fehler_db[error] = moegliche_teile
         
-    return fehler_db, teile_db
+        error_data[error] = {"remedy": remedy, "parts": moegliche_teile}
+        
+    return error_data, teile_db
 
-fehler_zu_teilen, teile_zu_schaltplan = load_data()
+# Laden der Daten beim Start
+error_data, teile_zu_schaltplan = load_data()
 
 # ==============================================================================
 # FastAPI Anwendung
@@ -113,15 +76,15 @@ class SchematicRequest(BaseModel):
 async def search_errors(query: str = ""):
     if not query:
         return []
-    return [fehler for fehler in fehler_zu_teilen.keys() if query.lower() in fehler.lower()][:10]
+    return [fehler for fehler in error_data.keys() if query.lower() in fehler.lower()][:10]
 
 @app.get("/api/all_errors")
 async def get_all_errors():
-    return sorted(list(fehler_zu_teilen.keys()))
+    return sorted(list(error_data.keys()))
 
 @app.post("/api/parts")
 async def get_parts(request: PartRequest):
-    return fehler_zu_teilen.get(request.error, [])
+    return error_data.get(request.error, {"remedy": "Keine Daten gefunden.", "parts": []})
 
 @app.post("/api/schematic")
 async def get_schematic(request: SchematicRequest):
