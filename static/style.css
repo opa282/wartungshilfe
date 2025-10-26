@@ -63,6 +63,25 @@ select:disabled {
     cursor: not-allowed;
 }
 
+#remedy-section {
+    margin-top: 30px;
+    padding: 20px;
+    background-color: #fffbe6;
+    border-left: 4px solid #ffc107;
+    border-radius: 4px;
+}
+
+#remedy-section h3 {
+    margin-top: 0;
+    font-size: 18px;
+    color: #b38600;
+}
+
+#remedy-text {
+    font-size: 16px;
+    color: #333;
+}
+
 #result-section {
     margin-top: 30px;
     padding: 20px;

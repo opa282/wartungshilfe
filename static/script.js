@@ -2,6 +2,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const errorSearch = document.getElementById('error-search');
     const suggestionsBox = document.getElementById('suggestions-box');
     const errorDropdown = document.getElementById('error-dropdown');
+    const remedySection = document.getElementById('remedy-section');
+    const remedyText = document.getElementById('remedy-text');
     const partsSection = document.getElementById('parts-section');
     const partSelect = document.getElementById('part-select');
     const resultSection = document.getElementById('result-section');
@@ -24,7 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
             .catch(error => {
                 console.error('Fehler beim Laden der Fehlerliste:', error);
                 errorDropdown.innerHTML = '<option>Laden fehlgeschlagen</option>';
-                errorDropdown.disabled = false; // KORREKTUR: Dropdown auch im Fehlerfall aktivieren
+                errorDropdown.disabled = false;
             });
     }
 
@@ -32,13 +34,13 @@ document.addEventListener('DOMContentLoaded', () => {
     errorDropdown.addEventListener('change', () => {
         const selectedError = errorDropdown.value;
         
-        // Interaktion synchronisieren
         errorSearch.value = '';
         suggestionsBox.style.display = 'none';
         
         if (selectedError) {
             fetchParts(selectedError);
         } else {
+            remedySection.style.display = 'none';
             partsSection.style.display = 'none';
             resultSection.style.display = 'none';
         }
@@ -46,11 +48,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Event Listener für die Fehlersuche ---
     errorSearch.addEventListener('input', () => {
-        // Interaktion synchronisieren
         errorDropdown.selectedIndex = 0;
 
         const query = errorSearch.value;
         
+        remedySection.style.display = 'none';
         partsSection.style.display = 'none';
         resultSection.style.display = 'none';
         partSelect.innerHTML = '';
@@ -88,7 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
     });
 
-    // --- Bestehende Funktionen ---
+    // --- Funktion zum Abrufen von Teilen und Lösungen ---
     function fetchParts(error) {
         const requestBody = { error: error };
 
@@ -98,9 +100,14 @@ document.addEventListener('DOMContentLoaded', () => {
             body: JSON.stringify(requestBody)
         })
         .then(response => response.json())
-        .then(parts => {
+        .then(data => {
+            // Lösungsvorschlag anzeigen
+            remedyText.textContent = data.remedy;
+            remedySection.style.display = 'block';
+
+            // Teile-Dropdown füllen
             partSelect.innerHTML = '<option value="">-- Bitte wählen --</option>';
-            parts.forEach(part => {
+            data.parts.forEach(part => {
                 const option = document.createElement('option');
                 option.value = part;
                 option.textContent = part;
@@ -109,10 +116,11 @@ document.addEventListener('DOMContentLoaded', () => {
             partsSection.style.display = 'block';
         })
         .catch(error => {
-            console.error('Fehler beim Laden der Teile:', error);
+            console.error('Fehler beim Laden der Teile und Lösungen:', error);
         });
     }
 
+    // --- Event Listener für Teilauswahl ---
     partSelect.addEventListener('change', () => {
         const selectedPart = partSelect.value;
 
@@ -131,7 +139,7 @@ document.addEventListener('DOMContentLoaded', () => {
         .then(response => response.json())
         .then(data => {
             if (data.schematic) {
-                schematicResult.textContent = `\'${data.schematic}\'`;
+                schematicResult.textContent = `'${data.schematic}'`;
                 resultSection.style.display = 'block';
             } else {
                 resultSection.style.display = 'none';
@@ -142,12 +150,13 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
     
+    // --- Hilfsfunktionen ---
     document.addEventListener('click', (event) => {
         if (!errorSearch.contains(event.target)) {
             suggestionsBox.style.display = 'none';
         }
     });
 
-    // --- Initialer Aufruf beim Laden der Seite ---
+    // --- Initialer Aufruf ---
     loadAllErrorsDropdown();
 });
