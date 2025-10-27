@@ -12,8 +12,8 @@ from datetime import datetime, timedelta
 
 import random
 # Lokale Importe
-from wartungshilfe_web.config import settings 
-from wartungshilfe_web.database import User, UserInDB, get_user, add_user, verify_password, pwd_context, get_all_users, update_user_data, delete_user
+from config import settings 
+from database import User, UserInDB, get_user, add_user, verify_password, pwd_context, get_all_users, update_user_data, delete_user
 
 # ==============================================================================
 # Security Konfiguration
@@ -237,7 +237,6 @@ async def health_check():
 async def search_errors(query: str = "", current_user: User = Depends(get_current_active_user)):
     if not query:
         return []
-    return [fehler for fehler in error_data.keys() if query.lower() in fehler.lower()][:10]
     return [fehler for fehler in error_data.keys() if query.lower() in fehler.lower()]
 
 @app.get("/api/all_errors")
