@@ -7,8 +7,30 @@
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Digitale Wartungshilfe</h1>
+    <div id="login-container" class="container">
+        <h1>Anmeldung</h1>
+        <form id="login-form">
+            <div class="selection-box">
+                <label for="username">Benutzername:</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            <div class="selection-box">
+                <label for="password">Passwort:</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <button type="submit">Anmelden</button>
+            <p id="login-error" class="error-message"></p>
+        </form>
+    </div>
+
+    <div id="app-container" class="container" style="display: none;">
+        <div class="header">
+            <h1>Digitale Wartungshilfe</h1>
+            <div id="user-info">
+                Angemeldet als: <span id="user-role"></span>
+                <button id="logout-button">Abmelden</button>
+            </div>
+        </div>
         
         <div class="selection-box">
             <label for="error-search">1. Suchen Sie die Fehlermeldung:</label>
@@ -36,6 +58,73 @@
         <div id="result-section" style="display: none;">
             <h2>Benötigter Schaltplan:</h2>
             <p id="schematic-result"></p>
+        </div>
+
+        <!-- Admin Panel -->
+        <div id="admin-panel" style="display: none; margin-top: 2rem; border-top: 2px solid #ccc; padding-top: 1rem;">
+            <h2>Admin-Einstellungen</h2>
+            <div id="add-user-section">
+                <h3>Neuen Benutzer anlegen</h3>
+                <form id="add-user-form">
+                    <div class="selection-box">
+                        <label for="new-username">Benutzername:</label>
+                        <input type="text" id="new-username" name="new-username" required>
+                    </div>
+                    <div class="selection-box">
+                        <label for="new-password">Passwort:</label>
+                        <input type="password" id="new-password" name="new-password" required>
+                    </div>
+                    <div class="selection-box">
+                        <label for="new-role">Rolle:</label>
+                        <select id="new-role" name="new-role">
+                            <option value="user">User</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                    <button type="submit">Benutzer erstellen</button>
+                    <p id="add-user-status" class="status-message"></p>
+                </form>
+            </div>
+            <div id="backup-section" style="margin-top: 1.5rem;">
+                <h3>Daten-Backup</h3>
+                <button id="backup-users-button">Benutzerdaten herunterladen</button>
+            </div>
+        </div>
+
+        <!-- User Management Table -->
+        <div id="user-management-section" style="display: none; margin-top: 2rem;">
+            <h3>Benutzerverwaltung</h3>
+            <table id="user-table">
+                <thead>
+                    <tr>
+                        <th>Benutzername</th>
+                        <th>Rolle</th>
+                        <th>Aktionen</th>
+                    </tr>
+                </thead>
+                <tbody id="user-table-body">
+                    <!-- Benutzer werden hier dynamisch eingefügt -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Edit User Modal -->
+        <div id="edit-user-modal" class="modal" style="display:none;">
+            <div class="modal-content">
+                <span class="close-button">&times;</span>
+                <h2>Benutzer bearbeiten: <span id="edit-username"></span></h2>
+                <form id="edit-user-form">
+                    <input type="hidden" id="edit-user-original-username">
+                    <label for="edit-password">Neues Passwort (leer lassen, um nicht zu ändern):</label>
+                    <input type="password" id="edit-password" name="edit-password">
+                    <label for="edit-role">Rolle:</label>
+                    <select id="edit-role" name="edit-role">
+                        <option value="user">User</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                    <button type="submit">Speichern</button>
+                </form>
+            </div>
         </div>
     </div>
 
