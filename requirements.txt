@@ -4,4 +4,5 @@ gunicorn
 python-jose[cryptography]
 passlib[bcrypt]
 pydantic
+pydantic-settings
 python-multipart
